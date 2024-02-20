@@ -1,0 +1,78 @@
+fn action_one() i32!error{UnexpectedErr} {
+    return .UnexpectedErr;
+}
+
+let allocator = std.heap.Gpa.new().allocator();
+let mut vec: Vec<[]u8> = (1..1024)
+                .map(x -> x+100)
+                .map(x -> try allocator.alloc(u8, x))
+                .collect<Vec>();
+
+
+
+
+
+fn doSomething() []u8! {
+    let allocator = std.heap.page_allocator;
+
+    let buffer = allocator.alloc<u8>(4096)?(error.JustAllocErr);
+    return buffer;
+}
+
+
+
+
+effect EmptyLine() ^AsStr {
+    "".as       -- default result
+}
+
+-- print one file line by line
+fn catFile(filename: []u8) void!# {             
+    const fs = std.fs;
+    const println = print<"{s}\n">;
+
+    for line in fs
+                 .cwd()
+                 .openFile(filename)?
+                 .readToString()
+                 .lines() {     
+        if line.isEmpty() println(EmptyLine().perform)
+        else println(line);
+    }
+}
+
+fn well() void!# {
+    catFile("main.c")?#;        -- `#` stands for throw up the effect, just like `?` throw up an error
+
+    -- The lhs of the keyword handle is an effectfull expr, 
+    -- and the rhs is a lambda as the effect handler
+    -- lambda: ArgList -> Expr
+    catFile("main.zig")? handle () -> {
+        "Oh, it's an empty line.".as
+    } 
+    
+    catFile("main.c")? handle `default`;        -- throw up the effect
+}
+
+
+
+
+fn some(age: u8) usize {
+    if `likely` age < 70 {
+        ...
+    } else if `unlikely` age > 120 {
+        ...
+    } else {
+        ...
+    }
+}
+
+
+
+if let null @ value = numbers.nth(3) {
+    println("Out of range");
+} else {
+    println(value);
+}
+
+

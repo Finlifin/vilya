@@ -1,0 +1,19 @@
+const ui = import!("ui");
+const std = import!("std");
+
+const App = struct deriving(Debug, Copy, Clone) {
+    ...
+};
+
+impl ui.Application for App {
+    ...
+    fn run(self: &mut Self) void anyeffect {
+        ...
+    }
+}
+
+pub fn main() void anyeffect {
+    ui.main<App>();
+}
+
+

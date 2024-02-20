@@ -1,0 +1,40 @@
+-- <- comment infix
+-- < a, b > , a compile-time list
+-- < .a = 23 , .b = 34, .c = u64 > , a compile-time record/object/map
+-- < a_map | .typeName = "HttpResponse" > , update a compile-time map
+-- < a_list | .0 = 34, .1 = 23 > , update a compile-time list
+
+
+fn function_name<compile-time arg list>(runtime arg list) return_type { body } { subordinate clause }
+or
+square(a) = a * a
+
+
+const SomeStruct = struct {
+      a: u8,
+      b: u64,
+      c: f32,
+};
+
+
+
+-- A function that roles a type constructor, 
+-- such as Associated<SomeStruct>(), returns the struct {
+--       a: ?u8,
+--       b: ?u64,
+--       c: ?f32,
+-- };
+fn Associated<TheStruct: type>() type {
+   Type`
+	.fields = map<toNullUnion, fields<TheStruct>>()
+   `
+} {
+const toNullUnion = |field| match field {
+  	      		      -- match condition a literal value or a compile-time list, such as builtin.PERMITIVE_TYPES is <u8, u32, u64, ..., f64>
+			      builtin.PERMITIVE_TYPES => <field | .type = ?field.type> ,
+			      _ => @compileError("Not support non-permitive types yet.")
+			}
+}
+
+
+

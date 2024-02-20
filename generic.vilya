@@ -1,0 +1,79 @@
+const std = import!("std");
+const AsStr = std.str.AsStr;
+usingnamepsace std.prelude;
+
+pub fn main() void! {
+    let some = A {};
+    
+    inspect(some)!;
+}
+
+const A = struct {
+    `deriving(Display)`,
+    data: usize = 32,
+};
+
+fn inspect(data: ^AsStr) void! {
+    print<"{s}\n">(data.asStr())!
+}
+
+
+trait约束, algebraic effect约束, 前者针对类型, 后者针对函数
+生命周期约束, 约束我自己, 阿巴阿巴
+
+
+fn Iterator<Item: type> {
+    trait {
+        fn next(&mut self) -> ?Item;
+        ...
+        
+        fn map(self, f: F) Map[Self, F]
+        where 
+            `infer(B, Eff)`,
+            F = FnMut(T) B Eff,
+        {
+            Map.new(self, f);
+        }
+    }
+    
+    const Map = struct {
+        `infer(B, F)`,
+        ...
+    }
+}
+
+const Byte = struct {
+    ...
+};
+
+impl Iterator<T> for Byte {
+    fn next...
+};
+
+
+fn Vec<T: type> {
+    
+    struct {
+        ...
+
+        `if(T.isA(Order))`
+        fn sort(&mut self) { ... }
+    }
+}
+
+
+
+anytype在与元组配合时非常协调, 除了其依旧不支持lsp
+
+
+
+
+
+
+
+
+
+
+
+
+

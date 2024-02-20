@@ -1,0 +1,26 @@
+let Addr = enum {
+    v4(u8, u8, u8, u8),
+    v6(String),
+};
+
+let some = Addr.v4(127,0,0,0);
+let well = Addr.v6("fe80::1ff:fe23:4567:890a".into());
+
+let LinkedListNode = struct {
+    data: i64,
+    next: ?*LinkedListNode with default null,
+};
+
+
+let mut node0: LinkedListNode = undefined;                    -- Original initialization approach
+node0.data = 10;
+node0.next = null;
+
+let node1 = LinkedListNode(10, null);                         -- Initialization with derived constructor
+let node2: LinkedListNode = .{ .data = 10, .next = null };    -- Inference-based initialization
+let node3 = LinkedListNode { .data = 10, .next = null };      -- Struct literal initialization
+
+
+let nodes0: [_]LinkedListNode = [ node0, .{ .data = 10 } ];
+let nodes1: [_]LinkedListNode = [ node0, .{ .data = 10 } ] with repeat 100 ;
+let some = < "hello", "world" >~cast;                         -- Compile-time list as literal of runtime code;

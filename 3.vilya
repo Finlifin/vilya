@@ -1,0 +1,37 @@
+const std = import`std`
+
+Type`
+    .fields = ...
+`
+
+Satisfied`Order + Show | AsStr | Into String` -- From typeclass algebra to generic type description
+
+some.?* -- The value of some
+some.?*& -- 
+
+
+for i in iter.iter<.Mut>() do
+    -- process i
+end
+
+
+fn some<mutable: Tag ?.Immut>()
+{
+    if mutable == .Mut then ()
+    else ()
+}
+{
+    enum Tag = Mut | Immut
+}
+
+Satisfied`i32{ 1..1000 }`
+
+type, type descriptor, function, function descriptor, all of these are compile time maps;
+
+U0 expression
+    ordinary expression
+U1 expression
+    type constract
+    specification
+    
+

@@ -1,0 +1,87 @@
+-- Linked list
+pub fn LinkedList<T: type> {
+    ...
+
+    const Node = struct {
+        data: T,
+        next: ?&Node,
+    };
+
+    struct {
+        head: ?&Node,
+        len: usize,
+        allocator: std.mem.Allocator;
+
+        pub fn new...
+        
+        pub fn insert(&mut self, data: T) void! {
+            -- All the new nodes will be classified to the region 
+            -- which self.head guarding, as the `@` indicates
+            let neo@self.head = mem.create<Node, .{ .allocator = self.allocator }>
+                                    (.{ .data = T, .next = null })
+                                    ?(error.FailToAlloc);
+            
+            let mut end = self.last();
+            if let null = end {
+                self.head = neo;
+            } else {
+                end.?.next = neo;
+            }
+        }
+    }
+}
+
+
+pub fn Vec<T: type, ?option:VecOption> {
+    ...
+    
+    struct {
+        items: []T,
+        len: usize,
+        capacity: usize,
+        allocator: ^mem.Allocator,
+        
+        ...
+        pub fn new(?option: VecInitOption) Self! {
+            let option = if option == null { .{ } } else { option.? };
+            
+            let raw = mem.alloc<T,
+                                option.capacity,
+                                .{ .allocator = option.allocator, .zero_init = true }
+                               >()?;
+
+            return Self {
+                .items = raw,
+                .len = 0,
+                .capacity = option.capacity
+                .allocator = option.allocator,
+            },
+        }
+        
+        pub fn drop(&mut self, ?option: VecDropOption) {
+            mem.free(self.allocator, self.items);
+        }
+    }
+}
+
+-- vec -> items
+{
+    let mut vec = Vec<usize>.new();
+    let slice = vec.asSlice();
+    -- slice exits at a new region
+    
+    -- vec.items' region turn to active, and the region of slice shall be closed
+    vec.resize(1024, 0);    -- slice shall never be used since here
+
+    -- this operation shall never be permitted
+    slice.iter().forEach(i -> println(i));
+}
+
+vec     -> data1
+slice   -> data1
+
+vec     -> data2
+slice   -> data1
+
+
+-- list -> a -> b -> c -> null

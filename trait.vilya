@@ -1,0 +1,54 @@
+//! We need to figure that what's the charactor of typeclass in Vilya
+
+
+fn Vec<T: type, ?option: VecOption> type {
+    ...
+    struct {
+        ...
+        for T: Order => fn sort(self: &mut Self) { ... }
+    }
+}
+
+
+fn From<T: type> {
+    ...
+
+    // Finally this compile-time function returns a typeclass
+    typeclass {
+        fn from(T) Self {}
+        fn into(T) Self {}
+    }
+}
+
+let Order = typeclass {
+    fn max(Self, Self) Self {}
+    fn min(Self, Self) Self {}
+};
+
+let Some = struct {
+    id: usize,
+    age: u8,
+};
+
+impl Order for Some {
+    fn max(a: Self, b: Self) Self {
+        if a.age > b.age { a } else { b }
+    }
+
+    fn min(a: Self, b: Self) Self {
+        if a.age < b.age { a } else { b }
+    }
+}
+
+impl From<u8> for Some {
+    fn from(age: u8) Self {
+        Some {
+            id: rand<.type(usize)>(),
+            age: age,
+        }
+    }
+}
+
+
+
+

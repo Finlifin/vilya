@@ -1,0 +1,21 @@
+    // some不在其self-mut-lifetime, ref-mut-lifetime中, 因此无法被重新赋值或可变引用
+    // let some = "well".to_owned();
+
+    // some的self-mut, ref-mut, self-immut, ref-immu都在这里开始
+    let mut some = "well".to_owned();
+
+    let some_ref = &some;
+    // some的ref-mut在这里结束, 在此之前所有some的可变借用已不可用
+    println!("{}", some_ref);
+
+    let some_mut_ref = &mut some;
+
+    //some的ref-immut, ref-mut在这之前结束, 在此之前所有some的可变引用和不可变引用在此结束
+    println!("{}", some_mut_ref);
+
+    // some的self-mut, self-immut在这之后结束, 不再可访问
+    consume(some);
+
+    //  some的self-mut, self-immut在这之后重启, ref-immut和ref-mut结束, 在此之前所有some的可变引用和不可变引用在此结束
+    some = "hello".to_owned();
+    println!("{}", &some);

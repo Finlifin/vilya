@@ -1,0 +1,64 @@
+let file_content := open(env`CONFIG_FILE` || "/etc/config.yaml").readAll()
+                        where open<.ReadOnly, .Lock> catch |e| return e;
+                              readAll<std.heap.page_allocator> catch |e| when e == .AllocationFailed => panic("Fuck up;");
+
+
+
+const std = @import("std");
+const rand = std.rand;
+const fs = std.fs;
+
+fn swap_name_two_file(a, b: Path) !void {
+    let rn := rand.rand<Int, 1_000_000...9_999_999>();
+    sh`mv {a} /tmp/{rn}`.?;
+    sh`mv {b} {a}`.?;
+    sh`mv /tmp/{rn} {b}`.?;
+    sh`rm /tmp/{rn}`.?;
+}
+
+fn main() !void {
+    swap_name_two_file(a, b).?
+        where a = args`1` which fs.isFile
+              b = args`2` which fs.isFile
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+fn Associated<T: type>() type {
+   let fields = fields`T`;
+
+   return struct {
+   	  flip map fields $ |x| match x {
+	  
+}
+};
+}
+
+
+
+const SomeStruct = struct {
+    a: i32,
+    b: i64,
+    c: u8,
+};
+

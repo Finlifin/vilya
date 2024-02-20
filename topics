@@ -1,0 +1,31 @@
+依赖类型、Substructural type system
+编译期计算与沉降优化分析
+类型推导
+
+结构化数据复合， 张量化数据复合
+集合操作
+轴多态、秩多态
+
+史无前例的模式匹配能力
+组合子
+后置从句
+可选的高细粒度底层控制
+zig型动态派发
+
+代数效应
+结构化并发并行
+自动向量化、自动并行化
+
+生命周期与所有权
+新内存管理方式的探索: 简单、高效、可靠
+局部可变性
+精准内存布局控制
+
+
+形式化验证、自动化验证、自动化测试、repl
+
+
+
+ante, dafny, effekt, flix, idris, unison, BQN, wolfram, koka, encore, pony
+rust, haskell, scala, kotlin, swift, c++, zig, crystal, julia, typescript, elixir, red
+

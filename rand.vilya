@@ -1,0 +1,29 @@
+let rand = import!("std").rand;
+let ipv4_rand_generator = rand.rand<.type((u8, u8, u8, u8))>;
+
+
+let byte_rand_generator = rand.rand<.type(u8)>;
+let rand_buffer_generator = rand.rand<
+                                    .type([4096]u8), 
+                                    .{ .allocator = std.heap.c_allocator },
+                                    >;
+let yes_or_no = rand.rand<.from_with_probability([(true, 0.3), (false, 0.7)]);
+let something = rand.rand<
+                        .from([23, 34, 45, 10]),
+                        .{ .algorithm = .. },
+                        >;
+
+
+let rand_buffer_filler = rand.randFiller<.type(u8)>;
+let allocator = std.heap.c_allocator;
+let out buf:[]mut u8 = allocator.alloc(u8, 4096)?;
+rand_buffer_filler.fill(buf);
+
+
+let one_of = rand.rand<.one_of_slice(u8)>;
+let see_how = one_of(buf);
+
+let from_range = rand.rand<.range(1, 100, 1)>;
+
+
+

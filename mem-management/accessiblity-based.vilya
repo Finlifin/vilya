@@ -1,0 +1,166 @@
+const Accessibility = struct {
+    si: bool,
+    sm: bool,
+    ri: bool,
+    rm: bool,
+};
+
+const Var = struct {
+    id: Index,
+    acc: Accessibility,
+    refs: Vec<Var>,
+};
+
+
+
+const Buf = Vec<usize>;
+
+let mut a = Buf.new();
+-- a { si: 1, sm: 1, ri: 1, rm: 1, refs: [] }
+
+let b = Buf.asSlice();
+-- a { si: 1, sm: 0, ri: 1, rm: 0, refs: [ b ] }
+
+-- when a new asignment of $a takes place here, 
+--      - check the sm of a, if 1 then just pass else
+--      - disable all the acc of $a.refs and then pass
+a = Buf.new(.{ .capacity = 100 });
+-- a { si: 1, sm: 1, ri: 1, rm: 1, refs: [] }
+-- at this moment, b is unavalible at all, thus tihs operation never gonna be permitted
+inspect(b); -- damn it!
+
+
+let c = createS(a);
+
+
+const S = struct {
+    ref: &usize,
+};
+
+fn createS(vec: Vec<usize>) {
+    S {
+        ref: vec.get(10).?
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+let mut a = Buf.new();
+-- a { si: 1, sm: 1, ri: 1, rm: 1, refs: [] }
+let b = a.&;
+-- a { si: i, sm: 0, ri: 1, rm: 0, refs: [ b ] }
+-- b { si: i, sm: 0, ri: 1, rm: 0, refs: [ ] }
+let c = a.&mut; 
+-- a { si: i, sm: 0, ri: 1, rm: 0, refs: [ c ] }
+-- b { si: 0, sm: 0, ri: 0, rm: 0, refs: [ ] }
+-- c { si: i, sm: 0, ri: 1, rm: 0, refs: [ ] }
+let d = c.*.&;
+-- a { si: 1, sm: 0, ri: 1, rm: 0, refs: [ d ] }
+-- b { si: 0, sm: 0, ri: 0, rm: 0, refs: [ ] }
+-- c { si: 0, sm: 0, ri: 0, rm: 0, refs: [ ] }
+-- d { si: 1, sm: 0, ri: 1, rm: 0, refs: [ ] }
+
+let e = S { .ref = a.& };
+-- a { si: 0, sm: 0, ri: 0, rm: 0, refs: [ ], borrowed }
+-- b { si: 0, sm: 0, ri: 0, rm: 0, refs: [ ] }
+-- c { si: 0, sm: 0, ri: 0, rm: 0, refs: [ ] }
+-- d { si: 0, sm: 0, ri: 0, rm: 0, refs: [ ] }
+-- e { si: 1, sm: 0, ri: 1, rm: 0, refs: [ ], birefs: [ a ] }
+drop(a);
+-- a { si: 0, sm: 0, ri: 0, rm: 0, refs: [ ] }
+-- b { si: 0, sm: 0, ri: 0, rm: 0, refs: [ ] }
+-- c { si: 0, sm: 0, ri: 0, rm: 0, refs: [ ] }
+-- d { si: 0, sm: 0, ri: 0, rm: 0, refs: [ ] }
+-- e { si: 0, sm: 0, ri: 0, rm: 0, refs: [ ] }
+
+
+const Var = struct {
+    tag: Tag,
+    mut: bool,                  -- for reference types
+    var_type: Type,
+    acc: Accessibility,
+    refs: [],
+    birefs: [],
+};
+
+
+fn longer(a: []u8, b: []u8) []u8 {
+    -- a { si, ri }
+    -- b { si, ri }
+    -- return expression must satisfied si
+    if a.len > b.len { a } else { b }
+}
+
+const S = struct {
+    ref: &Buf,
+};
+
+fn well() {
+    let a = "alright";
+    -- a { si, ri }
+    let b = "not alright";
+    -- a { si, ri }
+    
+    println(longer(a, b));
+}
+
+
+{
+    let mut r: &i32 = undefined;
+    -- r { rm,  unfinished }
+
+    {
+        let x: i32 = 10;
+        -- x { si, ri }
+        r = x.&;
+        -- x { si, ri, refs: [ r ] }
+        -- r { sm, si, ri, rm }
+    }
+    -- r { }
+
+    -- denied
+    inpsect(r);
+}
+
+
+
+
+
+
+
+
+{
+    let s1 = "abc".toString();
+    let mut result: []u8 = undefined;
+    -- result { rm, sm, unfinished }
+    -- s1 { si, ri }
+    {
+        let s2 = "ab".toString();
+        -- s2 { si, ri }
+        result = longer(s1.asStr(), s2.asStr());
+        -- s1 { si, ri, ref: [ result ], borrowed }
+        -- s2 { si, ri, ref: [ result ], borrowed }
+        -- result { sm, si, ri, rm, birefs: [ s1, s2 ] }
+    }
+    -- s1 { si, ri, ref: [ ], borrowed }
+    -- s2 not in scope
+    -- result { }
+    inspect(result);
+}
+
+-- 

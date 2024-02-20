@@ -1,0 +1,37 @@
+def alter (a: F, b: F) c: F
+    where F = Option<anytype> \ E
+{
+    match a {
+        None => b,
+        _ => a
+    }
+}
+
+{} -> is always corresponding to a lexical scope
+< > -> is always corresponding to a compile-time calculation
+
+def Option : <T: type> -> type {
+    enum { Some(T), None }
+}
+
+pattern, expression, declaration
+type, compile-time pattern, compile-time expression, compile-time declaration
+refinement, constract, unit test
+typeclass
+
+literal:
+    type:
+        struct { .. }
+        enum { .. }
+        fn (type list) returntype
+        opaue
+        anyopaue
+        anytype / eff
+
+        effect: 
+            {effect expression}
+    compile-time:
+        array: < elem1, elem2, elem3, ... >
+        pair: key: value
+        map: < key1 => value1, key2 => value2 >
+        tuple: ( .. )

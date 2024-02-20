@@ -1,0 +1,38 @@
+match v {
+    34, 45, 0 | if true => {},
+    _ => {}
+}
+
+
+let Addr = enum {
+    v4(u8, u8, u8, u8),
+    v6(String),
+};
+
+let ip = Addr.v4(127,0,0,0);
+
+match ip {
+    .v4(first, ...) | first == 127 => {  },
+    .v6(addr) => { do_something(addr) },
+    _ip =>  bra_bra_bra(_ip)
+}
+
+let some = "hello world";
+match some {
+    "hello" ++ rest => assert(rest.eql(" world")),
+    _ => {}
+}
+
+let well = struct { first: i32, tagged: bool } { .first = 10, .tagged = false };
+match well {
+    .{ .tagged: true, ...} => { ... },
+    .{ .first: y, ...} => { ... }
+}
+
+
+match (a, b, c) {
+    (10, ...) => {},
+    (_, 10, ...) => {},
+    (1, 2, 3) => {},
+    _ => {}
+}

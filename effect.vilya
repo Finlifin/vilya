@@ -1,0 +1,137 @@
+def map(iter: List<T>, f: ^Fn(T) -> anytype \ anyeffect) -> List<@ReturnType(f)> \ @EffectOf(f)
+    where T = anytype
+{
+    ...
+}
+
+def SomeEff = effect {
+    fn(^AsRef<str>) -> i32,
+    { str -> @panic(str.as_ref()) }
+}
+
+def some() {
+    let some = list!(34,34,34,545);
+    some.map({x -> println!(x)}); -- this will exec default handler
+    try {
+        some.map({x -> do SomeEff(x.to_string())});
+    } handle (e) {
+        IO(message) => println!(message) ignore;
+    }
+}
+
+
+// 2024-02-01
+let DivEx = effect {
+    _type: fn (String) i32,
+    fn default(msg: String) i32 {
+        panic!(format<"{}\n">(msg));
+        0
+    }
+};
+
+fn save_div(a: i32, b: i32) i32 / DivEx {
+    if b != 0 { a / b } else do DivEx("Fuck up")
+}
+
+fn do_something() void / anyeffect {
+    let _ = save_div(20, 9)?;                   // throw up the effect request
+    let _ = save_div(100, 0) with default;      // dealing the effect with the effect's default handler
+    let _ = save_div(100, 0) with |_| 0;        // dealing the effect with closure
+
+    try {
+        save_div(12,0);
+        do_something_may_emit_other_effect();
+    } with {
+        DivEx(msg) => 0,
+        _ => @panic("Unimplemented effect occurs");
+    }
+    
+    let _ = save_div(23, 9);                    // and this is not gonna be compiled
+}
+
+
+// 2024-02-12
+let DivEx = effect {
+    fn (&str) i32,
+    fn default(msg: String) i32 {
+        panic!(format<"{}\n">(msg));
+        0
+    }
+};
+
+fn saveDiv(lhs: i32, rhs: i32) f32 DivEx {
+    if rhs == 0 { perform DivEx("oh no") } else lhs / rhs
+}
+
+const println = std.debug.print<"{s}\n">;
+
+fn doSomething() void anyeffect {
+    let mut some: f32 = 34.34;
+
+    // {
+    //   some = saveDiv(10, 0);
+    // }#{
+    //   DivEx(msg) => println(msg)
+    // }
+
+    // some = saveDiv(10, 0)#{ DivEx(msg) => {
+    //                                 println(msg);
+    //                                 resume 20;
+    //                              },
+    //                         _ => panic!("Unhandled effect occurs"),
+    //                       };
+    
+    some = saveDiv(10, 0)#some_handler
+    
+    const some_handler = handler DivEx {
+        DivEx(msg) => { println(msg); resume 0; }
+    };
+}
+
+[
+    e1_0, e1_1, e1_2 ...
+]
+[
+    e1_0, e2_0, e3_0, e1_1 ...
+]
+[
+    e1,
+]
+
+
+
+
+
+let result = saveDiv(10, 0)#some_handler;
+
+const some_handler = handler DivEx {
+    DivEx(msg) => { println(msg); resume 10; }
+};
+
+println(result);
+
+
+
+
+
+
+
+
+const DivErr = error {
+    rhs_is_none
+};
+fn saveDiv(lhs: i32, rhs: i32) DivErr!f32 {
+    if (rhs > 0) { return DivErr.rhs_is_none; } else { lhs / rhs };
+}
+
+var some = try saveDiv(10, 0);
+var some = saveDiv(10, 0) catch |e| switch(e) {
+    DivErr.rhs_is_none => 10
+};
+
+
+
+
+
+
+
