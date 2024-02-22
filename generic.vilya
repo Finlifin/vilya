@@ -57,7 +57,7 @@ fn Vec<T: type> {
         ...
 
         `if(T.isA(Order))`
-        fn sort(&mut self) { ... }
+        for T: Order => fn sort(&mut self) { ... }
     }
 }
 

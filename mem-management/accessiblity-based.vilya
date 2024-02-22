@@ -164,3 +164,7 @@ fn well() {
 }
 
 -- 
+
+
+-- fn, Fn, FnMut, FnOnce
+

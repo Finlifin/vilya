@@ -1,0 +1,18 @@
+-- compile time list
+<i32, usize>.append<bool>
+
+-- compile time map
+const map = <("alright", usize), ("ok", f64)>;
+map.get<"alright">
+
+function!{
+    .args = < i32, usize >,
+    .return_type = void,
+    body!{
+        let stream = std.io.getStdOut();
+        inline for arg in args {
+            stream.write(arg.toString());
+        }
+    }
+}
+

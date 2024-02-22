@@ -1,0 +1,38 @@
+effect EffA([]u8) usize;
+
+-- {effect}#{error}!{type}, `#` unwraps effect, `!` unwraps error
+fn some() #!void {
+    alright()#!;        -- bubble all the effects and errors from fn alright
+
+    -- all the effects and errors go handled
+    alright()# {
+        EffA(str) => 20
+    }!{ err ->
+        match err {
+            error.ToSmallMan => panic!("haha")
+        }
+    };
+    
+    -- only handle errors
+    alright()#! {
+        ...
+    }
+}
+
+fn alright() #!void {
+    if EffA("Give me a usize").perform > 100 {
+        return error.ToSmallMan;
+    } else {
+        println("ok, ok");
+    }
+}
+fn alright() !void {}
+fn alright() #void {}
+fn alright() void {}
+
+
+
+
+
+
+

@@ -1,0 +1,10 @@
+inline for i in compile_time_list {
+    ...
+}
+inline for (k, v) in compile_time_map {
+    ...
+}
+inline while
+inline if
+
+inline lambda -- can't catch a runtime-time value

@@ -37,3 +37,53 @@
 - opaque
 - anyopaue
 
+# generic type
+-- Something[T, N, F]
+const Something = enum {
+    a[T](T, T),
+    b[N](N, N, N, N),
+    c[F](F),
+    d(usize),
+    none,
+};
+
+-- SomeStruct[T]
+const SomeStruct = struct {
+    `generic T`
+    name: ^AsStr,
+    id: usize, 
+    data: T,
+};
+
+const AsStr = trait {
+    fn asStr(&self) []u8,
+};
+
+-- trait object of AsStr
+-- ^AsStr {
+--      self: *mut anytype, -- to the actual object
+--      vtable: *anytype,   -- to the vtatble
+-- }
+
+-- ToString
+const ToString = trait {
+    fn toString(&self) String,
+};
+
+
+const A = struct {
+    `derive Debug, Display`
+    a: usize 
+    b: usize,
+};
+
+
+
+
+
+
+
+
+
+
+

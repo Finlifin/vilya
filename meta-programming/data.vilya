@@ -1,0 +1,40 @@
+integer
+number
+bool
+type
+struct
+enum
+
+const RandType = enum {
+    from_type(type),
+    one_of_slice[T](meta.ComptimeList[T]),
+    range[N](N, N, N),
+};
+
+const RandOption = struct {
+    gpa: ?^Allocator = null,
+    algorithme: Algorithme = ...,
+};
+
+const std = import!("std");
+const Allocator = std.mem.Allocator;
+fn alright(gpa: ^Allocator) []u8 {
+    gpa.alloc<u8, .{}>(4096)! {
+        .AllocError => panic!("Failed to allocate memory"),
+    }
+}
+
+fn alright(gpa: impl Allocator) Buf {
+    match Buf::<u8>::new(gpa) {
+        Ok(b) => b,
+        Err(err) => panic!("..."),
+    }
+}
+
+
+
+fn create<T: type>() {
+    const AllocOption = struct {
+        init: ?T,
+    };
+}
