@@ -1,0 +1,43 @@
+const std = import!("std");
+usingnamepace std.prelude;
+
+-- println : fn (^Display)
+const println = print<"{}\n">;
+
+pub fn main() !void {
+    let file = fs.cwd().openFile("main.c")!;
+    
+    let gpa = GeneralPurposeAllocator.new(.{});
+    
+    let content = file.readToString<.{ .allocator = gpa.&.as }>()!;
+    
+    for line in content.lines() {
+        println(line);
+    }
+}
+
+
+pub fn main() !void {
+    -- This version use the GLOBAL_ALLOCATOR
+    
+    fs.cwd()
+      .openFile("main.c")!
+      .readToString()
+      .lines()
+      .forEach(line -> println(line));
+}
+
+
+pub fn main() !void {
+    -- In fact std.fs.File has lines: fn(&self) Line
+    
+    fs.cwd()
+      .openFile("main.c")!
+      .lines()
+      .forEach(line -> println(line));
+}
+
+
+
+
+
