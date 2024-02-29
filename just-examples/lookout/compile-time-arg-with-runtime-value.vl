@@ -1,0 +1,61 @@
+const std = import!("std");
+usingnamespace std.prelude;
+
+
+const ToStringOption = struct {
+    runtime allocator: &dyn std.mem.Allocator,
+};
+
+pub fn main() !void {
+    let gpa = mem.page_allocator;
+    -- problem one: comptime arg with runtime value
+    -- problem two: how can toString recieve a comptime option
+    -- let str = "Okay".toString<.{ .alloc = true }>(.{ .allocator = gpa.allocator() });
+    let str = "Okay".toString<.{ .allocator = gpa.allocator() }>();
+    -- 
+    -- let str = "Okay".toString(gpa.allocator())();
+    -- let str = toString(gpa.allocator())("Okay");
+}
+
+-- gpa.allocator() : &dyn Allocator { data, vtable }
+
+-- ?
+fn ToString<?option: ToStringOption> {
+    trait {
+        fn toString() String {
+            ...
+        }
+    }
+}
+
+fn ToString<?option: ToStringOption> {
+    trait {
+        fn toString<?option: ToStringOption> {
+            ...
+        }
+    }
+}
+
+impl ToString<...option...> for SomeStruct ...
+-- -> impl fn toString<?option: ToStringOption> for SomeStruct ??
+inline impl ToString for SomeStruct {
+    fn toString<?option: Option> {
+        function!{
+            .self = .mut_ref,
+            .args = <>,
+            body! {
+                ...
+            }
+        }
+    }
+    -- so that means, an instantiated value is able to call static comptime-functions of corresponding container namespace
+}
+
+
+----
+impl Container 
+    --> Container.*
+
+impl ToString for Container
+    --> Container.* or Container.ToString.*
+----
