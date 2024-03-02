@@ -59,3 +59,37 @@ impl Container
 impl ToString for Container
     --> Container.* or Container.ToString.*
 ----
+
+
+-- 2024.3.2
+const ManaOption = enum { self, cus, global };
+fn ToString[ ...] {
+    trait {
+        fn toString[?mana: ManaOption = .global,...] {
+            ...
+        }
+    }
+}
+
+let gpa = std.mem.GeneralPurposeAllocator.new();
+
+-- String里每个需要alloc的函数都得传入allocator (如何RAII?)
+-- 给他一个脱离RAII的机制，然后全手动管理（
+let leak string = "toString".toString[.mana = .cus](gpa); 
+
+let string = "toString".toString[.mana = .self](gpa); -- String 中将会多出一个allocator field
+let string = "toString".toString();   -- 使用全局allocator
+
+
+
+
+
+
+
+
+
+
+
+
+
+

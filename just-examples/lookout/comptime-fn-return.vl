@@ -1,0 +1,34 @@
+-- $[usize, usize, isize] => Compile time list
+-- %[usize: "yes", isize: "no"] => Compile time map
+
+
+fn alright[] {
+    let argslist = $[u32, u8, usize];
+    fn $argslist {
+        let stream = ...;
+--         inline for arg in argslist {
+--             stream.write(arg.toString());
+--         }
+        argslist.forEach[ arg ->
+            stream.write(arg.toString());
+        ];
+    }
+}
+
+-- 比之前合理很多，好
+
+
+
+
+let alright = [23,34,45];
+let _ = alright.1;
+let slice = alright.[0..2];
+
+let tuple = (34,34,45456,56,3);
+let _ = tuple.3;
+
+
+
+
+
+
