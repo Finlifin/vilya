@@ -1,0 +1,15 @@
+fn openFile(filename: []u8,
+            .mode: FileOpenMode = .read_only) io.Error!File {
+    ...
+}
+
+fn Vec[T: type,
+       .management: Ranagement = .global,
+       .fixed: bool = false,
+       .increment_rate: float = 1.5] {
+    struct {
+        ...
+    }
+}
+
+

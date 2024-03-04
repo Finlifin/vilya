@@ -1,3 +1,9 @@
+-- EffectExpr -> 'effect' Identifier '(' {ComptimeExpr} ')'
+-- EffectDecl -> EffectExpr ';'
+-- ComptimeExpr -> Identifier | ComptimeListLiteral | ComptimeMapLiteral | ComptimeFnCall 
+-- EffectType -> ComptimeExpr | 'error' '{' {ComptimeExpr} '}'
+-- EffectiveType -> EffectType '#' ComptimeExpr
+
 effect EffA([]u8) usize;
 
 -- {effect}#{error}!{type}, `#` unwraps effect, `!` unwraps error
@@ -34,5 +40,9 @@ fn alright() void {}
 
 
 
-
-
+toString[.mana = .global]()
+Identifier[.mana = .global]()
+ComptimeFnCall()
+ComptimeExpr()
+FnCall
+Expr

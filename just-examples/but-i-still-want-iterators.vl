@@ -1,0 +1,39 @@
+--* 2024.3.4
+
+const std = import!("std");
+usingnamespace std.prelude;
+
+pub fn main() !void {
+    fs.cwd()
+      .openFile("alright.txt")!
+      .readToString()
+      .lines()
+      .forEach(x -> println(x));
+}
+
+
+fn Iter[Item: type] {
+    trait Iter {
+        fn next(&self) -> ?Item;
+
+        fn forEach(&self, f: ^FnMut[$[Item], void]) {
+            while true {
+                let i = self.next()
+                if i == null { break; }
+                f(i.?);
+            }
+        }
+        ...
+    }
+}
+
+-- String.lines : &self -> Lines
+impl Item[[]u8] for Lines {
+    fn next(&self) -> ?[]u8 {
+        ...
+    }
+}
+
+
+
+-- 好好好，这下又变成泛型的问题了( ^FnMut(Item) )
