@@ -11,24 +11,31 @@ fn longest(s1: []u8, s2: []u8) []u8 {
 
 
 const Var = struct {
-    si: bool,
-    sm: bool,
-    ri: bool,
-    rm: bool,
+    -- abilities
+    si: bool, -- 被用于赋值
+    sm: bool, -- extend si, 重新赋值
+    ri: bool, -- 构造不可变引用,
+    rm: bool, -- extend rm，构造可变引用
     
     weather_ref_mut: bool,
     borrowed_by: Vec[Var],
     preserved_by: Vec[Var],
+    
+    -- 赋值
+    -- 被用于赋值
+    -- 取可变引用
+    -- 取不可变引用
+    -- 并发并行
 };
 
 const Buf = Vec[u8, .init_capacity = 4096];
 
 let mut a = Buf.new();
 -- a { si, sm, ri, rm } 
-let b: &Buf = a.&;
+let b: *Buf = a.&;
 -- a { si, ri, borrowed_by: [b] } 
 -- b { si, ri }
-let c: &mut = a.mut&;
+let c: *mut Buf = a.mut&;
 -- a { borrowed_by: [c] } 
 -- b { }, thus b was ended because it just a immutable reference
 -- c { si, ri, weather_ref_mut }, 

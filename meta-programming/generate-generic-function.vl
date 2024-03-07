@@ -1,0 +1,37 @@
+const std = import!("std");
+use std.prelude;
+
+-- println : fn<T>(T)
+const println = print["{any}\n"];
+
+pub fn main() !void {
+    println("Fuck off");
+}
+
+
+
+fn comptimeFn[times: usize] {
+    -- 获取一个个数times、成员全是null的编译时列表
+    let args: [$]?type = $[null].intoIter[].repeat[times].collect[meta.List];
+    -- 获取一个个数times、成员全是the trait Display的编译时列表
+    let generics: [$][$]trait = $[[Display]].intoIter.repeat[times].collect[meta.List];
+    
+    -- 该编译时函数返回一个运行时函数
+    -- 当fn用于构造函数时，第一参数是一个item为?type的编译时列表，其item的index即函数的参数index
+    -- 当item为null时, 该index处的类型将视为泛型，其trait约束将在fn的第三个构造参数中的对应位置取得，
+    -- 其trait约束为一个[$]trait, 即一个元素为trait的编译时列表，当该列表为空时，泛型无约束
+    -- fn的三个参数都是可选的
+    -- `$`用于避开歧义
+    fn $args $void $generics  {
+        -- `inline for`将会自动展开其表达式
+        inline for a in args {
+            println(a);
+        }
+    }
+}
+
+
+-- type in rust: fn(impl Display, impl Display, impl Display, impl Display, impl Display)
+const print5args: fn(~Display, ~Display, ~Display, ~Display, ~Display) = comptimeFn[5];
+
+
