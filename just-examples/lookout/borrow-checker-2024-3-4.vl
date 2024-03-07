@@ -1,0 +1,36 @@
+fn substring(s: []mut u8, begin: usize, end: usize) ?[]mut u8 {
+    if end >= s.len() { return null; }
+    s.mut[begin..end]
+}
+
+
+fn longest(s1: []u8, s2: []u8) []u8 {
+    if s1.len() >= s2.len() { s1 } else { s2 }
+}
+
+
+
+const Var = struct {
+    si: bool,
+    sm: bool,
+    ri: bool,
+    rm: bool,
+    
+    weather_ref_mut: bool,
+    borrowed_by: Vec[Var],
+    preserved_by: Vec[Var],
+};
+
+const Buf = Vec[u8, .init_capacity = 4096];
+
+let mut a = Buf.new();
+-- a { si, sm, ri, rm } 
+let b: &Buf = a.&;
+-- a { si, ri, borrowed_by: [b] } 
+-- b { si, ri }
+let c: &mut = a.mut&;
+-- a { borrowed_by: [c] } 
+-- b { }, thus b was ended because it just a immutable reference
+-- c { si, ri, weather_ref_mut }, 
+let something = SomeStruct{.bufref = c};
+-- 

@@ -1,0 +1,35 @@
+-- no type generic
+fn doSomething[T: type](vec: *mut Vec[T], f: ~FnMut[$[*mut T], void]) void {
+    vec.iterMut().forEach(f);
+}
+
+pub fn main() !void {
+    let mut vec = vec!($[34,45,56,67,78,89]);
+    doSomething[usize](vec.mut&, x -> { x.* += 1; });
+}
+
+-- type generic
+fn doSomething<T>(vec: *mut Vec[T], f: ~FnMut[$[*mut T], void]) {
+    vec.iterMut().forEach(f);
+}
+
+pub fn main() !void {
+    let mut vec = vec!($[34,45,56,67,78,89]);           -- T is infered to i32 by default
+    doSomething(vec.mut&, x -> { x.* += 1; });
+}
+
+-- My god, it's not a collision
+
+
+
+
+
+
+-- The upper will be translated to the follow
+fn doSomething[T: type] {
+    fn (vec: *mut Vec[T],
+        f: FnMut[$[*mut T], void]) void {
+        vec.iterMut().forEach(f);
+    }
+}
+

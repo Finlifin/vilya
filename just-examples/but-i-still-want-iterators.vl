@@ -11,29 +11,40 @@ pub fn main() !void {
       .forEach(x -> println(x));
 }
 
-
 fn Iter[Item: type] {
     trait Iter {
         fn next(&self) -> ?Item;
 
-        fn forEach(&self, f: ^FnMut[$[Item], void]) {
+        fn forEach(*self, f: ~FnMut[$[Item], void]) {
             while true {
                 let i = self.next()
                 if i == null { break; }
                 f(i.?);
             }
         }
+        
+        fn map[O:type](*self, f: ~FnMut[$[Item], O]) Map[Self, Typeof!(f)] {
+            return Map[Item, Typeof!(f)].new(self, f);
+        }
         ...
     }
 }
 
--- String.lines : &self -> Lines
+
+pub fn main() !void {
+    let vec = vec!(3,45,5,667,78,56);
+    let vec2 = vec.iter().map[i32](i -> i+1).collectVec();
+}
+
+
+
+-- String.lines : *self -> Lines
 impl Item[[]u8] for Lines {
-    fn next(&self) -> ?[]u8 {
+    fn next(*self) -> ?[]u8 {
         ...
     }
 }
 
 
 
--- 好好好，这下又变成泛型的问题了( ^FnMut(Item) )
+-- 好好好，这下又变成泛型的问题了( ~FnMut(Item) )
