@@ -3,6 +3,7 @@
 -- <p>, multi-item with space delimiter
 -- p1 | p2, union
 
+expr -> 
 add_expr ->
 sub_expr ->
 multiplication_expr ->
@@ -66,9 +67,74 @@ exchange_error_expr ->
 macro_call_expr ->
 fn_call_expr ->
 method_call_expr -> 
-cpt_fn_call_expr ->
-cpt_nullable_type_expr ->
+effect_call_expr ->
+comptime_fn_call_expr ->
+comptime_nullable_type_expr ->
 
 
 return_expr ->
 noreturn_expr ->
+
+
+
+
+
+
+type -> pointer_type 
+    | optional_type 
+    | array_type
+    | tuple_type
+    | slice_type
+    | trait_object_type
+    | comptime_list_type
+    | comptime_map_type
+    | struct_type
+    | enum_type
+    | union_type
+    | fn_type
+    | error_type
+    | effct_type
+    | error_union_type
+    | effect_union_type
+    | type_type
+    | void_type
+    | noreturn_type
+    | permitive_type
+pointer_type -> '*' ['mut'] type
+optional_type -> '?' type
+array_type -> '[' comptime_expr ']' ['mut'] type
+tuple_type -> '(' {type} ')'
+slice_type -> '[' ']' type
+trait_object_type -> ^ ['mut'] trait
+comptime_list_type -> '[' '$' ']' type
+comptime_map_type -> '[' '%' ']' type
+struct_type -> 'struct' '{' {struct_field_decl} '}'
+enum_type -> 'enum' '{' {enum_field_decl} '}'
+union_type -> 'union' '{' {union_field_decl} '}'
+error_type -> 'error' '{' {error_field_decl} '}'
+fn_type -> 'fn' ['<' {generics} '>'] '(' {type} | comptime_list ')' type
+effct_type -> 'effect' '(' {type} ')' type
+# error{FileNotFound}!usize
+error_union_type -> type '!' type 
+effect_union_type -> type '#' type
+type_type -> 'type'
+void_type -> 'void'
+noreturn_type -> 'noreturn' 
+permitive_type -> 'u8'
+                | 'u16'
+                | 'u32'
+                | 'u64'
+                | 'u128'
+                | 'usize'
+                | 'integer'
+                | 'i8'
+                | 'i16'
+                | 'i32'
+                | 'i64'
+                | 'i128'
+                | 'isize'
+                | 'f32' 
+                | 'f64'
+                | 'float'
+                | 'char'
+                | 'bool'

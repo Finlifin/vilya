@@ -1,0 +1,102 @@
+const Var = struct {
+    si: bool, -- 传参
+    sm: bool, -- 传参，更改
+    ri: bool, -- 取不可变引用, 不可变引用传参
+    rm: bool, -- 取可变引用, 可变引用传参
+
+    borrowed_by: HashSet[Ref],
+    borrows: HashSet[Var],
+    moved_to: HashSet[Var],
+};
+
+-- slice, pointer, trait object
+const Ref = struct {
+    si: bool,
+    sm: bool,
+    ri: bool,
+    rm: bool,
+
+    mutable: bool,
+};
+
+const Vec = std.Vec[u8];
+{
+    let mut a = Vec.new();
+    
+}
+
+
+{
+    let mut s1 = "a".toString();
+    -- s1 { si, sm, ri, rm }
+    let s2 = "b".toString();
+    -- s1 { si, sm, ri, rm }
+    -- s2 { si, ri }
+    let s3 = longest(s1, s2);
+    -- s1 { si, ri, borrowed_by: { s3 } }
+    -- s2 { si, ri, borrowed_by: { s3 } }
+    -- s3 { si, ri, borrows: { s1, s2 } }
+    s1 = "c".toString();
+    -- s1 { si, sm, ri, rm, borrowed_by: { } }
+    -- s2 { si, ri, borrowed_by: { } }
+    -- s3 { }
+}
+
+fn longest<T: AsStr>(s1: T, s2: T) []u8 {
+    if s1.asStr().len() >= s2.asStr().len() { s1 } else { s2 }
+}
+fn Some[T: type] {
+    struct {
+        r: *T
+    }
+}
+
+
+
+
+{
+    let mut s1 = "a".toString();
+    -- s1 { si, sm, ri, rm }
+    let s2 = "b".toString();
+    -- s1 { si, sm, ri, rm }
+    -- s2 { si, ri }
+    let some = Some[String] {
+        r: s1.&,
+    };
+    -- s1 { si, ri, borrowed_by: { some } }
+    -- some { si, ri, borrows: { s1 } }
+    
+    let s3 = longest(some.r, s2.&);
+    -- s3 { si, ri, borrows: { some, s2 } }
+    -- some { si, ri, borrowed_by: { s3 }, borrows: { s1 } }
+    -- s2 { si, ri, borrowed_by: { s3 } }
+    s1 = "c".toString();
+    -- s1 { si, sm, ri, rm }, mutation happenned, reset all state, try to drop all in `borrowed_by`
+    -- some {  }, some be dropped; it releases its `borrows`, and try to drop its `borrowed_by`
+    -- s3 {  }, s3 be dropped; it releases its `borrows`
+    -- s2 { si, ri }, so s2 be released from s3
+
+    -- this print shall fail to compile
+    -- rust prevents the assignment of s1 
+    -- vilya prevents the use of s3
+    println(s3); 
+}
+
+
+const A = struct {
+    data: usize,
+    self_ref: *mut usize,
+};
+
+{
+    let a = unsafe {
+        let mut a = A { .data = 19, .self_ref = undefined };
+        a.self_ref = a.data.&;
+        a
+    }
+}
+
+
+
+
+

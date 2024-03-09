@@ -1,87 +1,45 @@
--- Linked list
-pub fn LinkedList<T: type> {
-    ...
+const LinkedList = struct {
+    head: ?*mut Node,
 
-    const Node = struct {
-        data: T,
-        next: ?&Node,
+    const Node = {
+        data: usize,
+        next: ?*mut Node,
     };
-
-    struct {
-        head: ?&Node,
-        len: usize,
-        allocator: std.mem.Allocator;
-
-        pub fn new...
-        
-        pub fn insert(&mut self, data: T) void! {
-            -- All the new nodes will be classified to the region 
-            -- which self.head guarding, as the `@` indicates
-            let neo@self.head = mem.create<Node, .{ .allocator = self.allocator }>
-                                    (.{ .data = T, .next = null })
-                                    ?(error.FailToAlloc);
-            
-            let mut end = self.last();
-            if let null = end {
-                self.head = neo;
-            } else {
-                end.?.next = neo;
-            }
+    fn new() LinkedList {
+        Self { head: null }
+    }
+    
+    fn insert(*mut self, data: usize) void {
+        enter self { x -> 
+            let tail = x.lastMut();
+            tail.next = alloc Node{.data = data, .next = null};
+            -- <x> -> head
+            -- <x> -> head -> ... -> tail
+            -- <x> -> head -> ... -> tail -> neo
         }
     }
-}
+};
 
 
-pub fn Vec<T: type, ?option:VecOption> {
-    ...
+pub fn main() !void {
+    let iso mut list = LinkedList.new();
+    list.insert(4545);
     
-    struct {
-        items: []T,
-        len: usize,
-        capacity: usize,
-        allocator: ^mem.Allocator,
-        
-        ...
-        pub fn new(?option: VecInitOption) Self! {
-            let option = if option == null { .{ } } else { option.? };
-            
-            let raw = mem.alloc<T,
-                                option.capacity,
-                                .{ .allocator = option.allocator, .zero_init = true }
-                               >()?;
+    let r = list.last(); -- <r> -> <list>.last()
+    list.insert(114); -- unpermitted, the region <list> is not active
+    println(r.data);
 
-            return Self {
-                .items = raw,
-                .len = 0,
-                .capacity = option.capacity
-                .allocator = option.allocator,
-            },
-        }
-        
-        pub fn drop(&mut self, ?option: VecDropOption) {
-            mem.free(self.allocator, self.items);
-        }
-    }
-}
-
--- vec -> items
-{
-    let mut vec = Vec<usize>.new();
-    let slice = vec.asSlice();
-    -- slice exits at a new region
+    -- if the reference just creates a new region by default
+    let iso vec = Vec.new([12,324,34,54,5667,78][0..]);
+    let r: *i32 = vec.get(1).?; -- window <vec> => <r>
+    vec.append(34);     -- unpermitted, the region <vec> is not active
     
-    -- vec.items' region turn to active, and the region of slice shall be closed
-    vec.resize(1024, 0);    -- slice shall never be used since here
-
-    -- this operation shall never be permitted
-    slice.iter().forEach(i -> println(i));
+    -- if the reference is added to vec's region
+    let vec = Vec.new([12,324,34,54,5667,78][0..]);
+    let r: *i32 = vec.get(1).?; 
+    vec.append([12,324,34,54,5667,78][0..]);
+    println(r.*); -- segment fault!
 }
 
-vec     -> data1
-slice   -> data1
-
-vec     -> data2
-slice   -> data1
-
-
--- list -> a -> b -> c -> null
+r5 is active, r7 r6 are closed;r7 is old region and was freed, r6 is just created but not yet active
+<r1> <r2> <r3> <r4> [r5] (r6) (r7) ...

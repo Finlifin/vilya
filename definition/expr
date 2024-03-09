@@ -1,0 +1,16 @@
+## items
+fn [$]?type returntype [$][$]trait FnProperties
+struct
+union
+enum
+error
+effect
+
+## propterty
+`..`
+
+## generic
+## trait
+## macro
+## compile time caculation
+## 
