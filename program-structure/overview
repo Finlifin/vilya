@@ -1,0 +1,4 @@
+每个vilya项目都属于workspace, package, unmanaged三者中的一种
+
+workspace由多个package组成，在根目录下有一个项目描述文件，和多个可选的功能性配置文件
+package
