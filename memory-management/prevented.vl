@@ -1,0 +1,38 @@
+const std = import!("std");
+use std.prelude;
+const println: fn<S:AsStr>(S) = print["{s}\n"];
+
+
+test "single mut ref or multi imm ref" {
+    let mut vec = String.init();
+    let slice = vec.asStr();
+    vec.resize(4096);
+    println(slice); -- borrow checking error
+}
+
+
+fn longest<S: AsStr>(s1: S, s2: S) S {
+    if s1.asStr().len() >= s2.asStr().len() { s1 } else { s2 }
+}
+test "use after moved" {
+    let mut a = "a".toString();
+    let b = "b".toString();
+    let longer_one = longest(a, b);
+    
+    -- in rust, a has been moved thereby the follow line shall not be denied
+    a.toLower();   
+}
+
+test "mut after borrowed" {
+    let mut a = "a".toString();
+    let b = "b".toString();
+    let longer_one = longest(a.asStr(), b.asStr());
+    
+    a.toLower(); -- denied
+}
+
+test "temporary drop while borrowed" {
+    let a = "a".toString().asStr(); -- actually, a's lifetime has ended
+    
+    println(a);         -- denied
+}

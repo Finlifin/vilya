@@ -1,0 +1,23 @@
+const Box = struct<T> {
+    data: *T
+    fn init<T>(data: T) Self {
+        Self { data: GlobalAlloc.create(data), }
+    }
+    
+    fn deinit(*self) {
+        GlobalAlloc.destroy(self.data);
+    }
+    
+    fn raw(*self) *T {
+        self.data
+    }
+};
+
+
+
+test "A" {
+    let a = Box.init(10);
+    let b = a.raw();
+    
+    
+}
