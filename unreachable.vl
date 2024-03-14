@@ -1,0 +1,18 @@
+const std = @import("std");
+use std.prelude;
+
+
+-- provide completion comptime fn `print`, and the lsp knows print's information
+const println = pri
+-- prepare for providing print args completion 
+const println = print[]
+-- once the semi-colon is inserted, lsp knows its a binding, try to query this execution
+-- add the result is a generic runtime function, so the identifier `println` is binded to this lang-item
+const println = print["{any}\n", .stream = .stdout];
+
+-- println : fn<T>(T)void
+const println = print["{any}\n", .stream = .stdout];
+
+pub fn main() !void {
+    -- println("hello world");
+}

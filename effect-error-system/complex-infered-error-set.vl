@@ -1,0 +1,27 @@
+const IoErr = error {
+    UnexpectedEof,
+    FileNotFound,
+    RandomErr([]u8),
+};
+
+-- a: error{IoErr, Unknown, CondtionNotSeted}!bool
+fn a() !bool {
+    if getenv("CONDITION").?{ return error.CondtionNotSeted }.parse[bool]() {
+        try someMayEmitIoError()!;
+    } else {
+        return error.Unknown;
+    }
+}
+
+test "complex error" {
+    let result = a()! { e -> 
+        match e {
+            error.Unknown => ..,
+            IoErr.FileNotFound => ...,
+            IoErr.RandomErr("Fuck of") => ...,
+            IoErr.RandomErr(msg) => panic!("omg, what happenned: {}\n", msg),
+        }
+    };
+}
+
+

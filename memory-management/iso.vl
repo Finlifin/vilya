@@ -15,9 +15,57 @@ const Box = struct<T> {
 
 
 
+const DoublyLinkedList = struct<T> {
+    iso head: ?*Node, 
+    
+    const Node = struct {
+        iso data: ?*T,
+        prev: *Node,
+        next: *Node,
+    };
+    
+    fn init() T { ... }
+    fn append(*self, move data: *T) !void { ... }
+    fn insert(*self, move data: *T) !void { ... }
+}
+
 test "A" {
     let a = Box.init(10);
     let b = a.raw();
     
     
 }
+
+
+const SinglelyLinkedList = struct<T> {
+    iso head: ?*Node,
+    const Node = struct {
+        iso data: *T,
+        iso head: ?*Node,
+    };
+    
+    fn init() Self { ... }
+    fn append(*self, move data: ?*T) !void { ... }
+    fn appendSlice(*self, move data: []T) !void { ... }
+    fn insert(*self, move data: ?*T) !void { ... }
+};
+test "B" {
+    let list = SinglelyLinkedList.init();
+    -- array.[*]
+    -- array.[1..*]
+    -- array.[1..44]
+    list.appendSlice([34,45,56,6,23,4556,67].[*])!;
+    let third: ?*i32 = list.get(2);
+    -- it's ok to mutation
+    third.?.* = 349;
+    
+    -- move `third` to other thread
+    std.thread.spwan(move () -> {
+        let _ = third;
+    });
+    -- `third`'s region and all the nodes whose regions was dominated by `third`
+    -- have been unreachable, 
+    -- hence the compiler denyes this line
+    println(third.?.*);
+}
+

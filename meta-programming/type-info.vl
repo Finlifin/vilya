@@ -14,3 +14,14 @@ fn format<T>(data: T) String {
 
 -- comptime expr to runtime expr ?
 
+
+fn checktype<T>(data: T) []u8 {
+    inline if data'type == u8 {
+        "u8"
+    } else {
+        "not u8"
+    }
+}
+
+println(checktype(23 as u8));
+

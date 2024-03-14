@@ -1,0 +1,34 @@
+-- define an effect 
+effect Yeild<T>(data: T) void;
+fn mayEmitYeild() Yeild<usize>#void {
+    -- it just emits the effect
+    Yeild(20).perform;
+}
+
+fn howToHandle() {
+    let mut a: usize = undefined;
+    mayEmitYeild()# {
+        Yeild(data) => a = data;
+    }
+}
+
+fn map<E: Effect>(monad: ?usize, f: ~Fn(usize) E#usize) E#?usize {
+    if monad == null {
+        null
+    } else {
+        f(monad.?)#;
+    }
+}
+
+
+test "not alright" {
+    let a: ?usize = 345;
+    let b = map(a, x -> {
+        Yeild(x).perform;
+        x + 1
+    })# {
+        Yeild(data) => ...
+    };
+}
+
+-- #!?*^Display is also a type, :P
