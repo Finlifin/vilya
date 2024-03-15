@@ -1,0 +1,19 @@
+test "alright" {
+    
+}
+
+-- how about a region be guided by a allocator
+let a = "a".toString();
+
+-- paper example
+    list: DLL
+--------------------
+let o1: *DLL.Node = list.head;
+let o2: *DLL.Node = o1.next();
+spawn(move () -> {
+    o1.payload.mut();
+})
+
+spawn(move () -> {
+    o1.payload.mut();
+})

@@ -1,0 +1,133 @@
+-- let和函数参数处结构都需要不可反驳模式
+-- 条件匹配可使用可反驳模式
+test "slice" {
+    let [first, ...tail] = "hello".[*];
+}
+
+test "optional" {
+    let value: ?bool = true;
+    if let ?some = value {
+        ...
+    }
+    
+    match value {
+        true => ...
+        false => ...
+        null => ...
+    }
+    
+    match value {
+        ?some =>  ...
+        _ => ...
+    }
+}
+
+test "nested" {
+    let a = struct {
+        a: struct {
+            a: usize, 
+            b: (usize, usize),
+        },
+        b: enum { start(i32), end },
+        c: []u8,
+    } { 
+        .a = .{
+            .a = 20,
+            .b = (0, 0),
+        },
+        .b = .start,
+        .c = "alright",
+    };
+    
+    match a {
+        .{
+            a: .{ a: 0, b: (0, 0) },
+            b: .end,
+            ...
+        } => println("not alright"),
+        .{
+            a,
+            b,
+            c: [0, 0, ...tail],
+        } => println(tail),
+        .{
+            b: .end,
+            ...
+        } => println("..."),
+        .{
+            a: .{ a, b },
+            b,  -- duplicated binding
+            ...
+        } => 
+        _ => @panic("unreachable"),
+    }
+}
+
+
+test "multi" {
+    let a = enum { start, running, end };
+    let b = true;
+    
+    -- `!.end` stands for if not end
+    while let (!.end, true) = (a, b) {
+        ...
+    }
+}
+
+test "error union" {
+    let e = error.No!bool;
+    -- unable to destruct a error union
+    if let .. = e {
+        ...
+    }
+    
+    -- the only way to destruct a error union
+    let payload = e! {
+        error.No => println("it's ok, don't worry")
+    };
+    
+    let payload = e!(error.Alright);
+}
+
+test "bits" {
+    let a = 0xFFFFFFFFu64;
+    
+    match a {
+        -- 从第0位开始，到31位
+        0xFFFF#{a:[0:31]} => println(b'typename), -- print [0:31]@u64
+        -- 从第0位开始，到55位
+        0b1111111#{n:[0:55]} => println(later'typename), -- print [0:55]@u64
+        _ => {},
+    }
+}
+
+test "tagged union" {
+    const Union = enum {
+        first, 
+        second(u32, u32),
+        third { a: u32, b: u32 },
+    };
+    
+    let b = Union.second(45, 45);
+    
+    match b {
+        .third => unsafe {
+            println(b.as(Union.third).a);
+        }
+        .second(0, 0) => {},
+        .second => unsafe {
+            b.as(Union.second).0 = 20;
+        },
+        _ => {},
+    }
+}
+
+test "type match" {
+    const Union = enum { type_a(type), type_b(type) };
+    const some_type = Union.type_a(u32);
+    
+    inline match some_type {
+        .type_b(ty) => println(ty.name),
+        _ => @comptimePanic("Oh no"),
+    }
+}

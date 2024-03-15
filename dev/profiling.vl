@@ -1,0 +1,9 @@
+test "random" {
+    @time {
+        const rand_int_generator = std.rand.randType[usize];
+        
+        for _ in 0..1_000_000 {
+            let _ = rand_int_generator();
+        }
+    };
+}
