@@ -1,0 +1,14 @@
+test "" {
+    let mut scheduler = Scheduler.init();
+    let mut a: http.Response = undefined;
+    -- when the scheduler finishes its work, the scheduler emits an async effect
+    scheduler.spawn(() -> {
+        http.easy.get("https://google.com")
+    })# {
+        Await(res) -> a = res
+    };
+}
+
+
+
+

@@ -1,0 +1,25 @@
+test "" {
+    -- r< ... > stands for the region stack, string[str] stands for `the region which refed by str`
+    -- only the top region can be use, paused stack can be ref by the forwards
+    -- region stack is auto infered
+    let mut string = "hello world".toString(); -- r< string[] >
+    let str = string.asStr();                  -- r< string[str], str[] >
+    let ref_mut = string.mut&;                 -- r< string[str, ref_mut], str[], ref_mut[] >
+    
+    println(str);                              -- r< string[str], str[] >, `ref_mut[]` was closed
+    
+    string.toUpper();                          -- r< string[str] >, `str[]`,`ref_mut[]` was closed
+    println(str);                              -- fatal: `str` no more lives
+}
+
+
+
+
+
+
+
+
+
+
+
+

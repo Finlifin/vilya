@@ -131,3 +131,12 @@ test "type match" {
         _ => @comptimePanic("Oh no"),
     }
 }
+
+test "str" {
+    `regex`
+    match "say you, say me" {
+        "say you" => {}
+        _ => {}
+    }
+    
+}

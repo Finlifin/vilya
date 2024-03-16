@@ -1,0 +1,8 @@
+test "if" {}
+test "if let" {}
+test "while" {}
+test "loop" {}
+test "while let" {}
+test "let" {}
+test "for" {}
+test "match" {}

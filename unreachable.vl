@@ -1,4 +1,6 @@
 const std = @import("std");
+
+-- load all of std.prelude.*;
 use std.prelude;
 
 

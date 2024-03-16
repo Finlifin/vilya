@@ -1,0 +1,19 @@
+-- template must be defined before use, 
+-- token template can only be used in local file,
+-- and in the outest field
+
+
+template def name {
+    const $(name) = "$(name)".toString()
+}
+
+
+`def` fingolfin; 
+-- const fingolfin = "fingolfin".toString();
+
+
+
+
+
+
+
