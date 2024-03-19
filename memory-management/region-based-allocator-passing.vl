@@ -1,0 +1,69 @@
+let mut gpa = mem.GeneralPurposeAllcoator.new();
+let mut arena = mem.ArenaAllocator(gpa.asMut());
+
+enter iso(gpa.asMut()) {
+    let mut array = Vec[.mana = .stack, .init_capacity = 16].new();
+    array.set(0, array.len())! { unreachable };
+}
+
+-- algebraic style
+combine {
+    let a = "a".toString().asStr();
+    println(a);
+}# {
+    Allocator => gpa.asMut()
+}
+
+-- koka style region setting
+{
+    with gpa.asMut()
+    let file = fs.open("some.c")! {
+        .FileNotFound => @panic("..."),
+        ...
+    };
+    
+    let iso(gpa.asMut()) content = file.read_to_string();
+    -- i just want to clone every line hence it copied()
+    for line in content.lines().copied() {
+        println(line);
+    }
+}
+
+-- stack
+let mut iso(gpa.asMut()) list = LinkedList.new();
+for i in 1..100 {
+    list.insert(i);
+}
+
+list
+  |
+  --> head -> n -> n -> ...
+-- insert call
+*mut Allocator
+i
+*mut list
+void
+neo
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

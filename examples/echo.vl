@@ -1,0 +1,11 @@
+const std = @import("std");
+use std.prelude;
+
+pub fn main() !void {
+    let filename = env.args()
+                      .nth(1)
+                      .? { @panic("You must provide one arg for the filename.") };
+    fs.open(filename)!
+      .lines()
+      .forEach(line -> println(line));
+}

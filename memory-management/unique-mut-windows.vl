@@ -1,4 +1,9 @@
 test "" {
+    String : Clone
+    &mut String : Copy
+    str : Copy
+    
+
     -- r< ... > stands for the region stack, string[str] stands for `the region which refed by str`
     -- only the top region can be use, paused stack can be ref by the forwards
     -- region stack is auto infered
@@ -6,11 +11,136 @@ test "" {
     let str = string.asStr();                  -- r< string[str], str[] >
     let ref_mut = string.mut&;                 -- r< string[str, ref_mut], str[], ref_mut[] >
     
-    println(str);                              -- r< string[str], str[] >, `ref_mut[]` was closed
+    println(str);                              -- r< string[str], str[] >, `ref_mut[]` was closed, `ref_mut` was dropped
     
-    string.toUpper();                          -- r< string[str] >, `str[]`,`ref_mut[]` was closed
+    string.toUpper();                          -- r< string[] >, `str[]`, was closed, `str` was dropped
     println(str);                              -- fatal: `str` no more lives
 }
+
+
+
+
+
+
+
+test "temporary drop while borrowed in rust" {
+    let a = "a".toString().asStr(); -- actually, a's lifetime has ended
+    
+    println(a);         -- denied
+}
+test "temporary drop while borrowed in vilya" {
+    let a = "a".toString().asStr(); -- 
+    let a = AsStr.asStr(str.toString("a"));
+    -- t1 <- "a"
+    -- t2 <- str.toString_0(t1)
+    -- t3 <- AsStr.asStr(t2)
+    -- a <- t3
+    -- 
+    -- 
+    -- it's expected to be dropped after this call
+    -- t1 <- "b"
+    -- t2 <- str.toString_0(t1)
+    -- println(t2)
+    -- so comes the `temporary region`
+    -- all this tmp values will be construct in a new tmp region
+    -- only binding remains the tmp region, and the binding owns the region
+    println("b".toString());
+    
+    -- how about this
+    use http.url;
+    let response = http.easy.get("https://google.com".into());
+    --> region tmp begin
+    -- t1 <- ".."
+    -- t2 <- Into<Url>.into_0(t1)
+    -- t3 <- http.easy.get(t2)
+    -- response <- t3
+    --> region tmp owns by `response`
+    -- in this case, t2 remains after the response was constructed
+    -- hence after region was binded, those values in which is not be refered by the 
+    -- region ownner will be dropped
+    
+    println(a);
+}
+
+
+
+
+fn longest<S: AsStr>(s1: S, s2: S) S {
+    if s1.asStr().len() >= s2.asStr().len() { s1 } else { s2 }
+}
+
+test "mut after borrowed" {
+    let mut a = "a".toString();                         -- r< mut a[] >
+    let b = "b".toString();                             -- r< mut a[], b[] >
+    let longer_one = longest(a.asStr(), b.asStr());     -- r< mut a[longer_one], b[longer_one], longer_one[] >
+    
+    a.toLower();                                        -- r< mut a[] >
+}
+
+
+
+-- "The open regions form a LIFO stack."
+-- 
+test "fixed on 2024-3-19" {
+    -- one binding managing a region by default
+    -- all things shall be immutable by default
+    -- all the regions are suspended by default?
+    -- region states are infered by ownner's usage
+    -- String is a Clone
+    let a = "a".toString().asRef();
+    -- a<[a, String], "a">
+    let mut b = "b".toString().asRef();
+    -- b<[mut a, mut String], "b">
+    let longer_one = longest(a, b);
+    -- let longer_one = longest(a, b).toString(); this gonna works
+    -- a[longer_one]<[a, String], "a">
+    -- b[longer_one]<[mut a, mut String], "b">
+    
+    b.pushSlice(" tree");
+    -- println(longer_one);
+}
+
+effect AskAllocator() *mut mem.Allocator {
+    -- default returns the default allocator if not handled
+    -- it shall take lots of runtime checking within debug-build
+    mem.default_allocator
+}
+
+
+fn insert(list: *mut LinkedList, data: usize) AskAllocator#void {
+    ...
+    let mut new_node = AskAllocator()
+                        .perform
+                        .create(Node{.data = usize, .next = undefined})
+                        !{ @panic("Damn it, maybe allocator out of memory") };
+    ...
+}
+
+test "alright" {
+    let mut buf = mem.page_allocator.alloc<u8>(4096)!;
+    let mut fixed_buffer_allocator = mem.FixedBufferAllocator.new(buf);
+
+    let mut list = LinkedList.new();
+    list.insert(34)# {
+        AskAllocator => fixed_buffer_allocator.asMut<mem.Allocator>(),
+    };
+    
+    -- combine statements to handle effect calls and exceptions together
+    combine {
+        for i in 1..20 {
+            list.insert(34);
+        }
+    }# {
+        AskAllocator => fixed_buffer_allocator.asMut<mem.Allocator>(),
+    }
+}
+
+
+
+
+
+
+
 
 
 

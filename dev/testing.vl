@@ -1,4 +1,4 @@
-test "random" {
+test random {
     @time {
         const rand_int_generator = std.rand.randType[usize];
         
@@ -6,4 +6,8 @@ test "random" {
             let _ = rand_int_generator();
         }
     };
+}
+
+test random_child : random {
+    ...
 }

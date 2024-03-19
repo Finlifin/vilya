@@ -1,0 +1,129 @@
+new token:
+    {- -}
+    {{ }}
+    
+metadata_expr -> expr '\'' id
+
+inline if std.build.mode = .debug {
+    ...
+}
+
+@time expr;
+
+macro time expr {
+    let mut begin = std.time.now();
+    let _ = {{ expr }};
+    echo(std.time.now().diff(begin));
+}
+
+@time(expr)
+
+macro vec(...expr) {
+    {
+        -- plain code
+        let result = Vec.new();
+        -- {{ result.push(𝕩) }} is an ast template
+        -- {{ expr }}, in the @time case, since expr has been declared, the ast template will just expand the `expr`
+        > {{ result.push(𝕩); }}¨ expr
+        result
+    }
+}
+
+-- crystal style
+macro vec(...expr) {
+    {
+        let result = Vec.new();
+        {% for e in expr %}
+            result.push(e);
+        {% end %}
+        result
+    }
+}
+
+
+-- haskell style
+macro vec(...expr) {
+    {
+        let result = Vec.new();
+        {%
+            map expr (x -> {{ result.push(x) }})
+        %}
+        result
+    }
+}
+
+-- old vilya style 
+-- in which i don't know how to implement
+macro vec(...expr) {
+    {
+        let result = Vec.new();
+        inline for e in expr {
+            result.push(e);
+        }
+        result
+    }
+}
+
+so the BQN style wins!
+
+
+
+
+
+
+
+
+程序项
+表达式
+
+
+
+struct Struct {
+    
+}
+
+const Struct = struct {
+    
+}
+
+项表达式：
+    item -> item_kind ...item_info { ... }
+项定义式：
+    item_kind item_name ...item_info { ... }
+
+fn some[] {
+    
+}
+
+
+pub fn DoublelyLinkedList[
+    T: type,
+    .mana: enum{ global, manual, private } = .global]{
+    
+    match mana {
+        .global => GlobalDLL<T>,
+        .manual => UnmanagedDll<T>,
+        .private => PrivateDll<T>,
+    }
+}
+
+
+macro matches(expr, ...tags) {
+    match expr {
+        inline for tag in tags {
+            {{ e => true, }}
+        }
+        _ => false,
+    }
+}
+
+
+
+
+
+
+
+
+
+
+

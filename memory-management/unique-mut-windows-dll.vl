@@ -1,0 +1,89 @@
+const std = @import "std";
+use std.prelude;
+
+
+
+fn Dll[T: type] {
+    const Iter = struct {
+        ...
+    };
+    struct {
+        head: ?*mut Node, 
+
+        const Node = struct {
+            next: ?*mut Node,
+            prev: ?*mut Node,
+            data: T,
+            
+            pub inline fn new(data: T) mem.AlloError!*Node {
+                galloc.create(Node{ .data = data, .next = undefined, .prev = undefined })
+            }
+        };
+        
+        pub fn new() Self {
+            .{ .head = null }
+        }
+            
+        pub fn insert(*mut self, data: T) {
+            let mut neo = Node.new(data)! { @panic("failed to allocate memory.") };
+            if let ?head = self.head {
+                neo.next = head;
+                neo.prev = head.prev
+                neo.prev.next = neo;
+                head.prev = neo;
+                self.head = neo;
+            } else {
+                self.head = neo;
+                self.head.next = self.head;
+                self.head.prev = self.head;
+            }
+        }
+        
+        pub fn pop(*mut self) ?T {
+            if let ?head = self.head {
+                head.prev.next = head.next;
+                head.next.prev = head.prev;
+                let data = head.data;
+                galloc.destroy(head);
+                self.head = null;
+                data
+            } else {
+                null
+            }
+        }
+        
+        impl IntoIter[T] {
+            fn intoIter(self) ->  {
+                ...
+            }
+        }
+    }
+}
+
+fn insert<T>(list:*mut Dll[T], data: T) {
+    list.insert(data);
+}
+
+test "" {
+    -- r< list<>[] >
+    let mut list = Dll[usize].new(); 
+    -- r< list< node35[head, node35, node35] >[] >
+    list.insert(35);
+    -- r< list< node35[head, node33, node33], node33[node35, node35] >[] >
+    list.insert(33);
+    -- r< list< node35[head, node33, node84], node33[node84, node35], node84[node35, node33] >[] >
+    list.insert(84);
+    -- r< list< node35[head, node33, node64], node33[node84, node35], node84[node64, node33], node64[node35, node84] >[] >
+    
+    list.insert(64);
+}
+
+fn print[fmt: []u8] {
+    let builder = ...;
+    fn meta.@expandFnBuilder(builder) {
+        let stream = ...
+        inline for (arg, argty) in (fnargs, builder.args) {
+            io.write(format[argty](arg));
+        }
+    }
+}
