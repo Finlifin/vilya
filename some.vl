@@ -1,0 +1,15 @@
+let window = ui.Window.new(.title = "Fuck you");
+let root = ui.Div.new(.background = .rgba(0,0,0,0.8),
+                     .width = .super(100),
+                     .height = .super(100),
+                     .color = .hex("FFFFFFFF"),
+                     .font = .uniform { .family = "Noto Sans",
+                                        .size = .rm(1), 
+                                        .letter_spacing = .px(2), },
+                     .padding = .px(24),
+                    );
+window.setRootWidget(root);
+
+
+
+

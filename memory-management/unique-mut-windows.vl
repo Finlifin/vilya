@@ -79,6 +79,11 @@ test "mut after borrowed" {
 
 
 
+fn longest<S: AsStr>(need s1: S, need s2: S) S {
+    if s1.asStr().len() >= s2.asStr().len() { s1 } else { s2 }
+}
+
+
 -- "The open regions form a LIFO stack."
 -- 
 test "fixed on 2024-3-19" {
@@ -87,9 +92,9 @@ test "fixed on 2024-3-19" {
     -- all the regions are suspended by default?
     -- region states are infered by ownner's usage
     -- String is a Clone
-    let a = "a".toString().asRef();
+    let a: String = "a".toString(); -- Clone
     -- a<[a, String], "a">
-    let mut b = "b".toString().asRef();
+    let mut b: String = "b".toString(); -- Clone
     -- b<[mut a, mut String], "b">
     let longer_one = longest(a, b);
     -- let longer_one = longest(a, b).toString(); this gonna works
@@ -97,45 +102,35 @@ test "fixed on 2024-3-19" {
     -- b[longer_one]<[mut a, mut String], "b">
     
     b.pushSlice(" tree");
-    -- println(longer_one);
-}
-
-effect AskAllocator() *mut mem.Allocator {
-    -- default returns the default allocator if not handled
-    -- it shall take lots of runtime checking within debug-build
-    mem.default_allocator
+    println(longer_one); -- denied
 }
 
 
-fn insert(list: *mut LinkedList, data: usize) AskAllocator#void {
-    ...
-    let mut new_node = AskAllocator()
-                        .perform
-                        .create(Node{.data = usize, .next = undefined})
-                        !{ @panic("Damn it, maybe allocator out of memory") };
-    ...
-}
 
-test "alright" {
-    let mut buf = mem.page_allocator.alloc<u8>(4096)!;
-    let mut fixed_buffer_allocator = mem.FixedBufferAllocator.new(buf);
-
-    let mut list = LinkedList.new();
-    list.insert(34)# {
-        AskAllocator => fixed_buffer_allocator.asMut<mem.Allocator>(),
-    };
-    
-    -- combine statements to handle effect calls and exceptions together
-    combine {
-        for i in 1..20 {
-            list.insert(34);
-        }
-    }# {
-        AskAllocator => fixed_buffer_allocator.asMut<mem.Allocator>(),
-    }
+fn longest<T:AsStr>(rely s1: T, rely s2: T) T {
+    if s1.asStr().len() > s2.asStr().len() { s1 } else { s2 }
 }
 
 
+
+
+
+
+
+
+
+
+
+test "2024-3-20" {
+    -- region is suspended by default
+    let a = "a".toString();
+    let mut b = "b".toString();
+    let longer_one = longest(a.&, b.&);
+    -- longer_one is active now
+    suspend longer_one;
+    -- you can mut b now
+    b.toUpper();
+}
 
 
 

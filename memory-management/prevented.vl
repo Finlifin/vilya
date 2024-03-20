@@ -27,6 +27,7 @@ test "mut after borrowed" {
     let mut a = "a".toString();
     let b = "b".toString();
     let longer_one = longest(a.asStr(), b.asStr());
+    -- you need to suspend longer_one
     
     a.toLower(); -- denied
 }

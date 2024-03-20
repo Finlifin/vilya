@@ -1,0 +1,50 @@
+`loose`
+effect AskAllocator() *mut mem.Allocator {
+    -- default returns the default allocator if not handled
+    -- it shall take lots of runtime checking within debug-build
+    mem.default_allocator
+}
+
+
+fn insert(list: *mut LinkedList, data: usize) AskAllocator#void {
+    ...
+    let mut new_node = AskAllocator()
+                        .perform
+                        .create(Node{.data = usize, .next = undefined})
+                        !{ @panic("Damn it, maybe allocator out of memory") };
+    ...
+}
+
+test "stack overview" {
+    list.insert(34)# {
+        AskAllocator => fixed_buffer_allocator.asMut<mem.Allocator>(),
+    };
+    > insert call
+    34
+    *mut list
+    effect调用的参数和返回值的tagged union    
+    ...
+    > AskAllocator call
+    effect返回值
+    > alloc call
+    ...
+}
+
+test "alright" {
+    let mut buf = mem.page_allocator.alloc<u8>(4096)!;
+    let mut fixed_buffer_allocator = mem.FixedBufferAllocator.new(buf);
+
+    let mut list = LinkedList.new();
+    list.insert(34)# {
+        AskAllocator => fixed_buffer_allocator.asMut<mem.Allocator>(),
+    };
+    
+    -- combine statements to handle effect calls and exceptions together
+    combine {
+        for i in 1..20 {
+            list.insert(34);
+        }
+    }# {
+        AskAllocator => fixed_buffer_allocator.asMut<mem.Allocator>(),
+    }
+}
