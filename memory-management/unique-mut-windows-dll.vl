@@ -1,89 +1,158 @@
-const std = @import "std";
-use std.prelude;
-
-
-
-fn Dll[T: type] {
-    const Iter = struct {
-        ...
+const Dll = struct(T: Once + Debug) {
+    const Node = struct {
+        prev: *mut Node,
+        next: *mut Node,
+        data: T,
+        
+        fn new(data: T) #!*Self {
+            @create(Node{.data = data, ...undefined})!
+        }
     };
-    struct {
-        head: ?*mut Node, 
-
-        const Node = struct {
-            next: ?*mut Node,
-            prev: ?*mut Node,
-            data: T,
-            
-            pub inline fn new(data: T) mem.AlloError!*Node {
-                galloc.create(Node{ .data = data, .next = undefined, .prev = undefined })
-            }
-        };
-        
-        pub fn new() Self {
-            .{ .head = null }
+    
+    head: ?*Node, 
+    len: usize,
+    
+    pub fn new() Self {
+        Self {
+            .head = null,
+            .len = 0,
         }
-            
-        pub fn insert(*mut self, data: T) {
-            let mut neo = Node.new(data)! { @panic("failed to allocate memory.") };
-            if let ?head = self.head {
-                neo.next = head;
-                neo.prev = head.prev
-                neo.prev.next = neo;
-                head.prev = neo;
-                self.head = neo;
+    }
+    
+    -- unique `enter` in function signature
+    pub fn insert(enter *mut self, data: T) #!void {
+        -- mutable reference is unique hence it can represent the corresponding region
+        let mut node = Node.new(data)#!;
+        if let ?head = self.head {
+            node.prev = head.prev;
+            head.prev = node;
+            node.next = head;
+            node.prev.next = node;
+        } else {
+            self.head = node;
+            node.next = node;
+            node.prev = node;
+        }
+        self.len += 1;
+    }
+    
+    pub fn pop(enter *mut self) ?*Node {
+        if let ?head = self.head {
+            if self.len == 1 {
+                self.head = null;
             } else {
-                self.head = neo;
-                self.head.next = self.head;
-                self.head.prev = self.head;
-            }
-        }
-        
-        pub fn pop(*mut self) ?T {
-            if let ?head = self.head {
                 head.prev.next = head.next;
                 head.next.prev = head.prev;
-                let data = head.data;
-                galloc.destroy(head);
-                self.head = null;
-                data
-            } else {
-                null
             }
-        }
-        
-        impl IntoIter[T] {
-            fn intoIter(self) ->  {
-                ...
-            }
+            
+            self.len -= 1;
+            head
+        } else {
+            null
         }
     }
-}
-
-fn insert<T>(list:*mut Dll[T], data: T) {
-    list.insert(data);
-}
-
-test "" {
-    -- r< list<>[] >
-    let mut list = Dll[usize].new(); 
-    -- r< list< node35[head, node35, node35] >[] >
-    list.insert(35);
-    -- r< list< node35[head, node33, node33], node33[node35, node35] >[] >
-    list.insert(33);
-    -- r< list< node35[head, node33, node84], node33[node84, node35], node84[node35, node33] >[] >
-    list.insert(84);
-    -- r< list< node35[head, node33, node64], node33[node84, node35], node84[node64, node33], node64[node35, node84] >[] >
     
-    list.insert(64);
-}
-
-fn print[fmt: []u8] {
-    let builder = ...;
-    fn meta.@expandFnBuilder(builder) {
-        let stream = ...
-        inline for (arg, argty) in (fnargs, builder.args) {
-            io.write(format[argty](arg));
+    pub fn peek(rely *self) ?*Node {
+        if let ?head = self.head {
+            head
+        } else {
+            null
         }
     }
+    
+    pub fn show(*self) {
+        print["len: {}"](self.len);
+        if let ?head = self.head {
+            let mut node = head.*;
+            while true {
+                print["\t{:?#}\n"](node.data);
+                if node.next != head {
+                    node = node.next.*;
+                } else {
+                    break;
+                }
+            }
+        }
+    }
+
+    pub fn drop(enter *mut self) {
+        if let ?head = self.head {
+            let mut node = head;
+            while true {
+                let tmp = node.next;
+                @destroy(node);
+                if tmp.next == head {
+                    break;
+                } else {
+                    node = tmp;
+                }
+            }
+        } else {}
+    }
+};
+
+test:main "alright" {
+    let mut list = Dll.new();
+    -- list is suspended by default
+    combine {
+        list.insert(34); -- list is active now
+        list.insert(34);
+        list.insert(34);
+        list.insert(34);
+        list.insert(34);
+        list.insert(34);
+        let _ = list.pop(); -- list is still active
+        -- you need to manually suspend the region if it's active
+        -- only suspended regions can be relied by something
+        suspend list;       
+        -- `peek` relies list immutablly, 
+        -- every regions is active by default if it relies on something
+        -- hence the region `peek` is active now
+        let peek = list.peak(); 
+        -- suspend list's immutable rely-relative regions manually
+        -- you cannot use list mutablly or linearly if peek is still active
+        suspend peek;
+        list.insert(458);
+        -- region `peek` is closed now
+    }#{
+        Allocator() => std.mem.default_allocator.asMut()
+    }!
+
 }
+
+fn mapSlice<T, E, Err, F: FnMut(T)->E#Err!T>(slice: []mut T, f: F) E#Err!T {
+    let len = slice.len();
+    let tmp = 0;
+    while tmp < len {
+        slice[tmp] = f(slice[tmp])#!;
+    }
+}
+
+
+test(main) "lambdas" {
+    let mut a = [34,456,3,76,87,6,895];
+    let _ = a.intoIter()
+             .map(x -> {
+                 list.insert(x);
+                 x + 1
+             }).collect<Vec<_>>();
+
+    mapSlice(a[0..], x -> x + 1);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
